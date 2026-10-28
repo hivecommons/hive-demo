@@ -1,0 +1,26 @@
+# Fails while a pull request carries the `hold` label. Hive's quality agent labels every PR it opens at
+# ACMM L3 with `hold`; the label alone does not stop GitHub's Merge button, so the `hold-gate` ruleset
+# requires this check to pass. Removing the label re-runs the check (the `unlabeled` event) and it goes
+# green.
+#
+# Inactive while it sits in setup/. Moved to .github/workflows/ by hand, through a pull request, as part
+# of making the repo Hive-ready (README.md, "Before promoting to L3").
+name: hold-gate
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions: {}
+
+jobs:
+  hold-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail while the PR is labelled hold
+        if: contains(github.event.pull_request.labels.*.name, 'hold')
+        run: |
+          echo "::error::This PR is labelled 'hold'. A human must review it and remove the label before it can merge."
+          exit 1
+      - name: No hold label
+        run: echo "Not held."

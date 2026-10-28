@@ -1,0 +1,41 @@
+# Runs Hive against your copy of this repo. See README.md, "Start Hive".
+#
+# A cut-down copy of Hive's own src/docker-compose.yaml: just the hive container, with the dashboard
+# published on localhost. No nginx gateway and no auto-update.
+name: hive-demo
+
+services:
+  hive:
+    # `stable` on 25 Oct 2026 (revision 251cd47). Pinned so every run uses the same Hive.
+    image: ghcr.io/hivecommons/hive@sha256:421295fd435a123e51e7955d5f210c58a0fa5659a6cca4920f448cfa4690483f
+    container_name: hive-demo
+    # Hive's egress proxy installs iptables rules for the agents.
+    cap_add:
+      - NET_ADMIN
+    ports:
+      # The dashboard and API, behind Hive's authenticating proxy. The raw terminal (7681) is
+      # deliberately not published.
+      - "127.0.0.1:3001:3001"
+    environment:
+      HIVE_REPO: ${HIVE_REPO:?set HIVE_REPO to <owner>/<repo> of your copy}
+      HIVE_GITHUB_APP_ID: ${HIVE_GITHUB_APP_ID:?set HIVE_GITHUB_APP_ID}
+      HIVE_GITHUB_APP_SLUG: ${HIVE_GITHUB_APP_SLUG:?set HIVE_GITHUB_APP_SLUG}
+      HIVE_DASHBOARD_TOKEN: ${HIVE_DASHBOARD_TOKEN:?set HIVE_DASHBOARD_TOKEN}
+      HIVE_DEPLOYMENT_RUNTIME: docker-compose
+    volumes:
+      # Read-only: Hive rewrites a writable hive.yaml with the secrets expanded in plaintext.
+      - ./hive.yaml:/etc/hive/hive.yaml:ro
+      # The App's private key. Writable so Hive can take ownership of it and lock it down to 0600
+      # for its own user; agents run as other users and cannot read it.
+      - ../secrets:/secrets
+      # Everything Hive keeps: its runtime config, state, and the Claude sign-in.
+      - hive-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:3002/api/health && curl -sf http://127.0.0.1:3001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  hive-data:

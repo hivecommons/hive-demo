@@ -1,0 +1,27 @@
+# Hive's starting config: ACMM L1, acting as your GitHub App. ${VAR}s come from compose.yaml.
+#
+# Hive reads this once, on first start, then keeps its own copy in the data volume and changes that
+# as you promote it. Editing this file later has no effect until you reset Hive (README.md).
+acmm_level: 1
+
+# project.org and project.repos come from HIVE_REPO.
+
+github:
+  app_id: ${HIVE_GITHUB_APP_ID}
+  app_slug: ${HIVE_GITHUB_APP_SLUG}
+  key_file: /secrets/gh-app-key.pem
+
+dashboard:
+  port: 3002
+
+# Every agent runs on Claude, including the ones added when you promote to L2 and L3. Without this,
+# agents a level adds come up on Copilot.
+backends:
+  allow: [claude]
+
+# L1 roster. Promoting adds the rest; agents listed here run at every level.
+agents:
+  brainstorm:
+    backend: claude
+  guide:
+    backend: claude
