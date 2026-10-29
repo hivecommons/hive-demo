@@ -1,8 +1,8 @@
-# Hive's starting config: ACMM L1, acting as your GitHub App. ${VAR}s come from compose.yaml.
+# Hive's starting config: ACMM L2, acting as your GitHub App. ${VAR}s come from compose.yaml.
 #
 # Hive reads this once, on first start, then keeps its own copy in the data volume and changes that
 # as you promote it. Editing this file later has no effect until you reset Hive (README.md).
-acmm_level: 1
+acmm_level: 2
 
 # project.org and project.repos come from HIVE_REPO.
 
@@ -14,14 +14,31 @@ github:
 dashboard:
   port: 3002
 
-# Every agent runs on Claude, including the ones added when you promote to L2 and L3. Without this,
-# agents a level adds come up on Copilot.
+# Every agent runs on Claude, including the one added when you promote to L3. Without this, agents
+# a level adds come up on Copilot.
 backends:
   allow: [claude]
 
-# L1 roster. Promoting adds the rest; agents listed here run at every level.
+# The L2 roster. Every agent needs a model: Hive passes it straight to `claude --model`, and an
+# empty one breaks the launch. Pinned by full ID so every run uses the same models: Opus for the
+# agents that judge code, Sonnet for reading and summarising, Haiku for supervisor, which runs every
+# five minutes.
 agents:
-  brainstorm:
+  scanner:
     backend: claude
+    model: claude-opus-5-5
+  quality:
+    backend: claude
+    model: claude-opus-5-5
+  reviewer:
+    backend: claude
+    model: claude-opus-5-5
   guide:
     backend: claude
+    model: claude-sonnet-5-5
+  supervisor:
+    backend: claude
+    model: claude-haiku-5-5
+  brainstorm:
+    backend: claude
+    model: claude-sonnet-5-5

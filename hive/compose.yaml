@@ -21,6 +21,9 @@ services:
       HIVE_GITHUB_APP_ID: ${HIVE_GITHUB_APP_ID:?set HIVE_GITHUB_APP_ID}
       HIVE_GITHUB_APP_SLUG: ${HIVE_GITHUB_APP_SLUG:?set HIVE_GITHUB_APP_SLUG}
       HIVE_DASHBOARD_TOKEN: ${HIVE_DASHBOARD_TOKEN:?set HIVE_DASHBOARD_TOKEN}
+      # Applies the L2 pack on first start: the agents' prompts, advisory mode and schedules.
+      # Without it Hive runs the agents in hive.yaml with none of those until it is restarted.
+      HIVE_LEVEL: "2"
       HIVE_DEPLOYMENT_RUNTIME: docker-compose
     volumes:
       # Read-only: Hive rewrites a writable hive.yaml with the secrets expanded in plaintext.

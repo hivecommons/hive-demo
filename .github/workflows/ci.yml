@@ -17,4 +17,10 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go vet ./...
-      - run: go test ./...
+      - run: go test -coverprofile=coverage.out ./...
+      - name: Coverage by function
+        run: go tool cover -func=coverage.out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
